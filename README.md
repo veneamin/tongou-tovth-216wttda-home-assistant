@@ -19,7 +19,7 @@ This project focuses on additional functionality observed and tested on one phys
 
 ## Project status
 
-The integration has been tested on one physical TOVTH-216WTTDA Wi-Fi device and one Home Assistant installation (Core 2026.10.4). Reading, independent threshold writes, combined threshold movement, readback confirmation, and restoration of the original thresholds have been tested.
+The integration has been tested on one physical TOVTH-216WTTDA Wi-Fi device and one Home Assistant installation (Core 2026.10.4). Reading, independent threshold writes, combined threshold movement, readback confirmation, restoration of the original thresholds, and dynamic slider-bound updates after hysteresis changes have been tested. The eight offline unit tests also pass.
 
 The integration can use its own Tuya Cloud credentials from Home Assistant YAML and secrets.yaml. Existing installations can temporarily continue using credentials stored by LocalTuya.
 
