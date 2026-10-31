@@ -92,12 +92,12 @@ Only the S1 threshold datapoints are writable:
 - DP 22 / temp_set: lower threshold.
 - DP 110 / temp_set_f_3: upper threshold.
 
-The integration does not write relay, switch, automatic-mode, or control-mode datapoints. Each threshold write is followed by a cloud readback check. The combined slider orders the two writes to avoid crossing the thresholds.
+The integration does not write relay, switch, automatic-mode, or control-mode datapoints. Each threshold write is followed by a cloud readback check. The combined slider orders the two writes to avoid crossing the thresholds. Its lower-bound control range is recalculated from the current hysteresis gap (`0` to `40 - gap`). When either independent threshold control is changed, the integration immediately rereads both cloud values and updates the combined slider's maximum. For example, a 2 °C gap permits a lower threshold up to 38 °C; a 3 °C gap permits up to 37 °C.
 
 See [device datapoints and evidence](device-datapoints.md) for the observed mapping, limitations, and model-variant distinctions.
 
 ## Validation
 
-After editing YAML, run the Home Assistant configuration check before restarting. Confirm that the four sensors and three number entities receive values from the device.
+After editing YAML, run the Home Assistant configuration check before restarting. Confirm that the four sensors and three number entities receive values from the device. When testing the controls, change one independent threshold and verify that the combined slider's maximum changes to match the new gap.
 
 The datapoint mapping and threshold behavior have been tested on one physical TOVTH-216WTTDA Wi-Fi device. Other firmware revisions and product variants may behave differently.
