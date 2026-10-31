@@ -29,6 +29,21 @@ This profile documents two sensors and two switches. It does **not** document th
 
 The temperature and humidity IDs (27 and 46) agree with the values observed through Tuya Cloud on the device used for this project. The switch mapping is documented by tuya-local; this project does not currently expose or write those switch datapoints.
 
+## Native Tuya custom quirk
+
+The repository also provides an optional [custom quirk for Home Assistant's built-in Tuya integration](native-tuya-quirk.md). It matches the exact Wi-Fi product and registers the two measurement datapoints as read-only entities:
+
+| DP ID | DP code | Entity meaning | Unit |
+|---:|---|---|---|
+| 27 | `temp_current` | Current temperature | °C |
+| 46 | `humidity_value` | Relative humidity | % |
+
+The quirk overrides the device category to `wsdcg` to reuse Home Assistant's built-in WSDCG sensor definitions. It does not register threshold controls or writable datapoints.
+
+This was tested on Home Assistant Core 2026.10.4 with `tuya-device-handlers` 0.0.31. The custom-quirk loader reported that the quirks were loaded, and the native Tuya integration created both sensor entities. During verification on the test device, temperature readings were approximately 16.0–16.1 °C and humidity readings were 33–34%.
+
+These are results from one device and one software version, not a compatibility guarantee for other firmware or Home Assistant releases.
+
 ## Cloud properties observed on the tested device
 
 The following property codes and meanings were observed through Tuya Cloud on one TOVTH-216WTTDA device.
@@ -85,6 +100,7 @@ This project focuses on the additional cloud-based S1 threshold monitoring and g
 ## Evidence and limitations
 
 - The Tuya Cloud property mapping and S1 threshold behavior are based on one physical Wi-Fi device.
+- The native Tuya quirk was tested on one physical device with Home Assistant Core 2026.10.4 and `tuya-device-handlers` 0.0.31.
 - The tuya-local mapping is taken from its merged device profile for the exact Wi-Fi model.
 - The Zigbee2MQTT converter is a user-contributed example for a different Zigbee model variant.
 - No claim is made that every firmware revision or hardware variant exposes the same properties.
