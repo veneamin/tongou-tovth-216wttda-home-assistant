@@ -137,6 +137,10 @@ async def async_setup_platform(
     combined = TuyaShowerCombinedNumber(
         device_id, api, lower, upper, write_lock
     )
+    # Независимые регуляторы уведомляют общий ползунок об изменении порогов:
+    # его максимальная граница зависит от текущей разницы между ними.
+    lower._combined_entity = combined
+    upper._combined_entity = combined
     async_add_entities([lower, upper, combined])
 
     # При старте только читаем значения; команды управления не отправляются.
@@ -163,6 +167,8 @@ class TuyaShowerNumber(NumberEntity):
         self._code = control["code"]
         self._dp_id = control["dp_id"]
         self._value = None
+        # Ссылка назначается после создания общего ползунка в async_setup_platform.
+        self._combined_entity = None
         self._attr_name = control["name"]
         self._attr_unique_id = f"{device_id}_{control['key']}"
 
@@ -223,6 +229,11 @@ class TuyaShowerNumber(NumberEntity):
             )
             self._value = new_value
             self.async_write_ha_state()
+
+            # Перечитываем пару после изменения одного порога. Это обновляет
+            # разницу гистерезиса и native_max_value общего ползунка в HA.
+            if self._combined_entity is not None:
+                await self._combined_entity.async_refresh_value()
 
 
 class TuyaShowerCombinedNumber(NumberEntity):
