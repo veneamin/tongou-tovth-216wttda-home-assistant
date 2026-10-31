@@ -1,8 +1,8 @@
 # Tongou TOVTH-216WTTDA — Home Assistant
 
-Work in progress: community documentation and Home Assistant integration notes for the **Tongou TOVTH-216WTTDA** Wi-Fi temperature/humidity switch.
+Community documentation and a Home Assistant YAML integration for the **Tongou TOVTH-216WTTDA** Wi-Fi temperature/humidity switch.
 
-This repository documents a tested Home Assistant setup using Tuya Cloud. It is not an official Tongou, Tuya, or Home Assistant project.
+This is not an official Tongou, Tuya, or Home Assistant project.
 
 ## What this project adds
 
@@ -15,23 +15,28 @@ This project focuses on additional functionality observed and tested on one phys
 - A combined threshold control that preserves the current gap between lower and upper thresholds.
 - Readback verification after writes.
 - Safe command ordering to avoid crossing the two thresholds during updates.
-
-The goal is to complement existing local integrations, not replace them.
+- A self-contained Tuya Cloud API client; LocalTuya is optional and is not a dependency.
 
 ## Project status
 
-The initial implementation has been tested on one device and one Home Assistant installation. The current working setup uses Tuya Cloud for reading properties and writing the two S1 temperature thresholds.
+The integration has been tested on one physical TOVTH-216WTTDA Wi-Fi device and one Home Assistant installation (Core 2026.10.4). Reading, independent threshold writes, combined threshold movement, readback confirmation, and restoration of the original thresholds have been tested.
 
-The public integration is being prepared for reusable installation. Installation instructions, compatibility details, and independent Tuya Cloud authentication are still being developed.
+The integration can use its own Tuya Cloud credentials from Home Assistant YAML and secrets.yaml. Existing installations can temporarily continue using credentials stored by LocalTuya.
+
+The implementation is intended for community testing. Hardware behavior and cloud datapoints may vary by firmware, product variant, and Tuya region.
+
+## Installation
+
+See [Installation and configuration](docs/installation.md) for manual installation, Tuya Cloud credential setup, secrets.yaml examples, and YAML platform configuration.
 
 ## Safety
 
 The documented implementation writes only:
 
-- DP 22: `temp_set` — lower S1 threshold.
-- DP 110: `temp_set_f_3` — upper S1 threshold.
+- DP 22: temp_set — lower S1 threshold.
+- DP 110: temp_set_f_3 — upper S1 threshold.
 
-It does not write relay, channel switch, operating-mode, or automatic-mode datapoints. Do not copy private device identifiers, Tuya credentials, tokens, or account identifiers into configuration files or issue reports.
+It does not write relay, channel switch, operating-mode, or automatic-mode datapoints. Do not copy private device identifiers, Tuya credentials, tokens, or account identifiers into configuration files committed to Git or issue reports.
 
 ## Device variants and related projects
 
@@ -40,10 +45,9 @@ It does not write relay, channel switch, operating-mode, or automatic-mode datap
 
 ## Documentation
 
+- [Installation and configuration](docs/installation.md)
 - [Device datapoints, evidence, and implementation notes](docs/device-datapoints.md)
-- [Installation](docs/installation.md) — planned
-- [Troubleshooting](docs/troubleshooting.md) — planned
 
 ## Disclaimer
 
-This is an independent community project. Hardware behavior and datapoint mappings may vary by firmware, product variant, Tuya region, and cloud API behavior. Verify the datapoints for your own device before enabling writes.
+This is an independent community project. The cloud property mapping and S1 threshold behavior are based on one physical Wi-Fi device. Verify the datapoints for your own hardware and firmware before enabling writes.
