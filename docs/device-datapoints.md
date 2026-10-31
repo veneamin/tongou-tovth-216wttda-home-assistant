@@ -63,7 +63,7 @@ In the tested automatic S1 temperature mode, the relay turns on below the lower 
 - When increasing both thresholds, write and confirm DP 110 first, then DP 22.
 - When decreasing both thresholds, write and confirm DP 22 first, then DP 110.
 - Read back actual values from Tuya Cloud before assuming a write succeeded.
-- The combined control preserves the current positive gap between thresholds. Its lower threshold range is 0 through `40 - gap`, keeping the upper threshold at or below 40 °C.
+- The combined control preserves the current positive gap between thresholds. Its lower threshold range is 0 through `40 - gap`, keeping the upper threshold at or below 40 °C. After either independent threshold is changed, both values are reread from Tuya Cloud and the combined slider's maximum is recalculated immediately. For example, a 2 °C gap gives a maximum lower threshold of 38 °C; a 3 °C gap gives 37 °C.
 
 These rules describe the tested implementation, not a guarantee for every firmware revision.
 
