@@ -96,8 +96,14 @@ The integration does not write relay, switch, automatic-mode, or control-mode da
 
 See [device datapoints and evidence](device-datapoints.md) for the observed mapping, limitations, and model-variant distinctions.
 
+## Optional native Tuya sensors
+
+If the device is added through Home Assistant's built-in Tuya integration, you can optionally install the custom quirk in [native-tuya-quirk.md](native-tuya-quirk.md). It exposes current temperature and humidity through native Tuya entities; it does not expose S1 threshold controls.
+
+The quirk can be used alongside `tuya_shower`, but both integrations may then create temperature and humidity entities. Disable whichever duplicate entities you do not need.
+
 ## Validation
 
-After editing YAML, run the Home Assistant configuration check before restarting. Confirm that the four sensors and three number entities receive values from the device. When testing the controls, change one independent threshold and verify that the combined slider's maximum changes to match the new gap.
+After editing YAML, run the Home Assistant configuration check before restarting. Confirm that the four `tuya_shower` sensors and three number entities receive values from the device. When testing the controls, change one independent threshold and verify that the combined slider's maximum changes to match the new gap.
 
 The datapoint mapping and threshold behavior have been tested on one physical TOVTH-216WTTDA Wi-Fi device. Other firmware revisions and product variants may behave differently.
