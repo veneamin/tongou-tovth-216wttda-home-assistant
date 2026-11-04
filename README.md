@@ -57,3 +57,8 @@ It does not write relay, channel switch, operating-mode, or automatic-mode datap
 ## Disclaimer
 
 This is an independent community project. The cloud property mapping and S1 threshold behavior are based on one physical Wi-Fi device. Verify the datapoints for your own hardware and firmware before enabling writes.
+
+
+## S1 automatic-mode control
+
+A Home Assistant switch implementation for DP 104 (automatic_mode_switch_1) has been added. The owner verified on the physical device that OFF disables the heating output and ON restores automatic regulation without changing the threshold values, channel switch DP 2, or control-mode DP 107. The new HA entity source has not yet been installed or tested in the running Home Assistant instance.
