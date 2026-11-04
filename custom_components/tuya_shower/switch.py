@@ -26,7 +26,7 @@ from . import (
     CONF_USER_ID,
     get_cloud_credentials,
 )
-from .sensor import _properties_to_dict
+from .helpers import properties_to_dict
 from .tuya_api import TuyaCloudClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -50,7 +50,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 def _read_bool_property(result: Any, code: str) -> bool | None:
     """Вернуть строгое boolean-значение DP; неизвестные значения не угадывать."""
     try:
-        value = _properties_to_dict(result).get(code)
+        value = properties_to_dict(result).get(code)
     except (AttributeError, TypeError, ValueError):
         return None
 
@@ -122,20 +122,26 @@ class TuyaShowerAutomaticSwitch(SwitchEntity):
 
     async def async_refresh_value(self) -> None:
         """Прочитать DP104 из Tuya Cloud без отправки команд."""
-        try:
-            result, status = await self._api.async_get_device_query_properties(
-                self._device_id
-            )
-            if status != "ok":
-                raise RuntimeError(f"Ошибка чтения DP {DP_ID}: {status}")
-            value = _read_bool_property(result, DP_CODE)
-            if value is None:
-                raise ValueError(f"Tuya не вернула корректное boolean-значение {DP_CODE}")
-            self._is_on = value
-            self.async_write_ha_state()
-        except Exception:
-            # При ошибке чтения не подменяем последнее состояние на OFF.
-            _LOGGER.exception("Tuya Shower: не удалось прочитать DP %s", DP_ID)
+        async with self._write_lock:
+            try:
+                result, status = await self._api.async_get_device_query_properties(
+                    self._device_id
+                )
+                if status != "ok":
+                    raise RuntimeError(f"Ошибка чтения DP {DP_ID}: {status}")
+                value = _read_bool_property(result, DP_CODE)
+                if value is None:
+                    raise ValueError(
+                        f"Tuya не вернула корректное boolean-значение {DP_CODE}"
+                    )
+                self._is_on = value
+            except Exception:
+                # Не показываем старое значение как актуальное после сбоя связи.
+                self._is_on = None
+                _LOGGER.exception("Tuya Shower: не удалось прочитать DP %s", DP_ID)
+            finally:
+                # Обновляем HA и при успехе, и при переводе сущности в unavailable.
+                self.async_write_ha_state()
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Разрешить автоматический режим S1 и подтвердить DP104 чтением."""
