@@ -1,6 +1,7 @@
 """Offline tests for the S1 automatic-mode switch (DP 104)."""
 from __future__ import annotations
 
+import asyncio
 import unittest
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -93,6 +94,44 @@ class AutomaticModeCommandTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(api.async_get_device_query_properties.await_count, 4)
         self.assertIsNone(entity.is_on)
         self.assertFalse(entity.available)
+
+    async def test_refresh_failure_marks_entity_unavailable(self):
+        """После потери связи старое ON/OFF не остаётся доступным в HA."""
+        entity, api = self._entity(False)
+        entity._is_on = True
+        api.async_get_device_query_properties = AsyncMock(
+            return_value=({}, "Tuya Cloud request failed")
+        )
+
+        await entity.async_refresh_value()
+
+        self.assertIsNone(entity.is_on)
+        self.assertFalse(entity.available)
+        entity.async_write_ha_state.assert_called_once()
+
+    async def test_refresh_waits_for_write_lock(self):
+        """Фоновый GET не должен конкурировать с write/readback транзакцией."""
+        entity, api = self._entity(True)
+        entered = asyncio.Event()
+        release = asyncio.Event()
+
+        async def delayed_read(_device_id):
+            entered.set()
+            await release.wait()
+            return _properties(True), "ok"
+
+        api.async_get_device_query_properties = AsyncMock(side_effect=delayed_read)
+        refresh_task = asyncio.create_task(entity.async_refresh_value())
+        await entered.wait()
+        # Блокировка уже удерживается refresh: новая команда не может начать GET.
+        command_task = asyncio.create_task(entity.async_turn_on())
+        await asyncio.sleep(0)
+        self.assertEqual(api.async_get_device_query_properties.await_count, 1)
+        release.set()
+        await refresh_task
+        await command_task
+        self.assertEqual(api.async_get_device_query_properties.await_count, 2)
+        api.async_make_request.assert_not_awaited()
 
     async def test_rejected_post_is_not_retried(self):
         """A rejected write is reported and is not repeated."""
