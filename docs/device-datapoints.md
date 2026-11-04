@@ -104,3 +104,16 @@ This project focuses on the additional cloud-based S1 threshold monitoring and g
 - The tuya-local mapping is taken from its merged device profile for the exact Wi-Fi model.
 - The Zigbee2MQTT converter is a user-contributed example for a different Zigbee model variant.
 - No claim is made that every firmware revision or hardware variant exposes the same properties.
+
+
+## S1 automatic-mode control verified on the physical device
+
+The owner tested the S1 automatic-mode control through the device interface:
+
+- DP 104 (automatic_mode_switch_1) OFF disabled the heating output.
+- DP 104 ON restored automatic temperature regulation.
+- DP 2 (switch_1) remained ON.
+- DP 107 (control_mode_1) remained temperature.
+- The lower and upper thresholds remained unchanged.
+
+The integration exposes this function as a separate Home Assistant switch that writes DP 104 only. It deliberately does not write DP 2, DP 105, DP 106, DP 107, DP 122, or DP 123. This observed behavior is based on one physical device and firmware.
