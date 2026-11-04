@@ -25,6 +25,7 @@ from . import (
     CONF_USER_ID,
     get_cloud_credentials,
 )
+from .helpers import properties_to_dict
 from .tuya_api import TuyaCloudClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -81,26 +82,6 @@ SENSORS = (
 )
 
 
-def _properties_to_dict(result: Any) -> dict[str, Any]:
-    """Преобразовать ответ Tuya в словарь значений по коду DP."""
-    properties = result.get("properties", []) if isinstance(result, dict) else []
-
-    # Некоторые варианты ответа Tuya уже содержат словарь code -> value.
-    if isinstance(properties, dict):
-        return properties
-
-    # Стандартный ответ shadow/properties содержит список объектов DP.
-    values: dict[str, Any] = {}
-    for item in properties:
-        if isinstance(item, dict) and item.get("code"):
-            values[item["code"]] = item.get("value")
-
-    if not values:
-        raise ValueError("Tuya вернула пустой список свойств устройства")
-
-    return values
-
-
 async def async_setup_platform(
     hass: HomeAssistant,
     config: dict,
@@ -150,7 +131,7 @@ async def async_setup_platform(
             if status != "ok":
                 raise RuntimeError(f"Ошибка чтения свойств Tuya: {status}")
 
-            values = _properties_to_dict(result)
+            values = properties_to_dict(result)
 
             # Обновляем все четыре сущности значениями из одного ответа API.
             for entity in entities:
