@@ -107,3 +107,22 @@ The quirk can be used alongside `tuya_shower`, but both integrations may then cr
 After editing YAML, run the Home Assistant configuration check before restarting. Confirm that the four `tuya_shower` sensors and three number entities receive values from the device. When testing the controls, change one independent threshold and verify that the combined slider's maximum changes to match the new gap.
 
 The datapoint mapping and threshold behavior have been tested on one physical TOVTH-216WTTDA Wi-Fi device. Other firmware revisions and product variants may behave differently.
+
+
+## S1 automatic-mode switch
+
+A YAML switch platform is available for the S1 automatic temperature mode. Add the following block using the same device ID and credential references as the sensor and number platforms:
+
+~~~yaml
+switch:
+  - platform: tuya_shower
+    device_id: YOUR_TUYA_DEVICE_ID
+    client_id: !secret tuya_shower_client_id
+    client_secret: !secret tuya_shower_client_secret
+    user_id: !secret tuya_shower_user_id
+    region: !secret tuya_shower_region
+~~~
+
+The switch writes only DP 104 (automatic_mode_switch_1). On the tested physical device, OFF disabled the heating output and ON restored automatic S1 temperature regulation. The switch does not change DP 2, DP 107, S2, or either threshold. It performs one write at most, then up to three read-only checks at two-second intervals. It polls the current value every 30 seconds. An uncertain write is not automatically retried.
+
+The source implementation has not yet been installed or tested in the running Home Assistant instance. Validate the YAML and confirm the entity state before using it. Any physical on/off test must be explicitly initiated by the device owner.
